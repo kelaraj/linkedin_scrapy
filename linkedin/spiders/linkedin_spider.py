@@ -9,6 +9,7 @@ class LinkedinSpider(CrawlSpider):
   centilist_one = [i for i in xrange(1,100)]
   centilist_two = [i for i in xrange(1,100)]
   centilist_three = [i for i in xrange(1,100)]
+  '''
   start_urls = ["http://www.linkedin.com/directory/people-%s-%d-%d-%d" 
                 % (alphanum, num_one, num_two, num_three) 
                   for alphanum in "abcdefghijklmnopqrstuvwxyz"
@@ -16,25 +17,18 @@ class LinkedinSpider(CrawlSpider):
                   for num_two in centilist_two
                   for num_three in centilist_three
                 ]
-  
+                '''
+  start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
 
-  '''
-  rules = (Rule 
-            (SgmlLinkExtractor(allow=("-\d", "-\d-\d", "-\d-\d-\d")), 
-              callback="parse_items",
-              follow=True),
-          )
-  '''
+  rules = (
+      Rule(SgmlLinkExtractor(allow=('\/pub\/.+', ))
+                            , callback='parse_item'),
+  )
 
-
-  def parse_items(self, response):
-    hxs = HtmlXPathSelector(response)
-    sites = hxs.select('//ul[2]/li')
-    items = []
-#    for site in sites:
-#      item = LinkedinItem()
-#      item['name'] = site.select('a/text()').extract()
-#      items.append(item)
-
-    filename = "./testdata/" + response.url.split("/")[-1]
-    open(filename, 'wb').write(response.body)
+  def parse_item(self, response):
+    if response:
+      hxs = HtmlXPathSelector(response)
+      item = LinkedinItem()
+      item['name'] = hxs.select('//span/span/text()').extract()
+      print item["name"][0] #  NEED TO ACCOUNT FOR NAMES WITH MULTIPLE ACCOUNTS
+      print item["name"][2]
