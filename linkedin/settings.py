@@ -12,4 +12,8 @@ SPIDER_MODULES = ['linkedin.spiders']
 NEWSPIDER_MODULE = 'linkedin.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'linkedin (+http://www.yourdomain.com)'
+USER_AGENT = 'thehackertrail (+http://www.thehackertrail.herokuapp.com)'
+
+# Automatically throttles crawling speed based on load of both the Scrapy 
+# server and the website being crawled
+AUTOTHROTTLE_ENABLED = True
