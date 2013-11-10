@@ -36,3 +36,4 @@ nosetests.xml
 .pydevproject
 entelo.pem
 /testdata
+.DS_Store

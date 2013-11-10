@@ -17,7 +17,7 @@ class LinkedinSpider(CrawlSpider):
                   for num_two in centilist_two
                   for num_three in centilist_three
                 ]
-                '''
+  '''
   start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
 
   rules = (
@@ -30,5 +30,20 @@ class LinkedinSpider(CrawlSpider):
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
       item['name'] = hxs.select('//span/span/text()').extract()
-      print item["name"][0] #  NEED TO ACCOUNT FOR NAMES WITH MULTIPLE ACCOUNTS
-      print item["name"][2]
+      if item["name"][0]:      
+        first_name = item["name"][0]
+        last_name = item["name"][2]
+        # insert into database
+      else:
+        pass
+        # hand off list of duplicates
+        #self.navigate_duplicates(response)
+
+  def navigate_duplicates(self, response):
+    # parse each name in list
+
+    # get each link from the profile page, pass it to parse_item
+    #//*[@id="results"]/li[1]/div/h3/a/strong[2]
+    for profile in profile_list:
+      self.parse_item(profile)
+    pass
