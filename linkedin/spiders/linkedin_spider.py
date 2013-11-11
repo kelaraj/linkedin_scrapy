@@ -21,18 +21,16 @@ class LinkedinSpider(CrawlSpider):
   '''
   start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
 
-  rules = (
-      Rule(SgmlLinkExtractor(allow=('\/pub\/.+', ))
-                            , callback='parse_item'),
-  )
+  rules = (Rule(SgmlLinkExtractor(allow=('\/pub\/.+', ))
+                , callback='parse_item'),
+          )
 
   def parse_item(self, response):
     if response:
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
       item['name'] = hxs.select('//span/span/text()').extract()
-      
-      # parse list of duplicate profile
+      # parse list of duplicate profiles
       if not item['name']:
         # NOTE: Results page only displays 25 of possibly many more names;
         # LinkedIn requests authentication to see the rest. Need to resolve
@@ -40,9 +38,8 @@ class LinkedinSpider(CrawlSpider):
                                           a/@href').extract()
         for profile_url in multi_profile_urls:
           yield Request(profile_url, callback=self.parse_item)
-      
       else:
-        # all of this should be handles in pipeline?
+        # all of this should be handled in pipeline?
         first_name = item["name"][0]
         last_name = item["name"][2]
         # insert into database
