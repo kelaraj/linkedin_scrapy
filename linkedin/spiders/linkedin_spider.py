@@ -29,9 +29,9 @@ class LinkedinSpider(CrawlSpider):
     if response:
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
-      item['name'] = hxs.select('//span/span/text()').extract()
-      # parse list of duplicate profiles
-      if not item['name']:
+      item['full_name'] = hxs.select('//span/span/text()').extract()
+      if not item['full_name']:
+        # recursively parse list of duplicate profiles
         # NOTE: Results page only displays 25 of possibly many more names;
         # LinkedIn requests authentication to see the rest. Need to resolve
         multi_profile_urls = hxs.select('//*[@id="result-set"]/li/h2/strong/ \
@@ -39,7 +39,20 @@ class LinkedinSpider(CrawlSpider):
         for profile_url in multi_profile_urls:
           yield Request(profile_url, callback=self.parse_item)
       else:
-        # all of this should be handled in pipeline?
-        first_name = item["name"][0]
-        last_name = item["name"][2]
-        # insert into database
+        # handle cleaning in pipeline
+        item['first_name'] = item['full_name'][0]
+        item['last_name'] = item['full_name'][2]
+        item['full_name'] = hxs.select('//span/span/text()').extract()
+        item['headline_title'] = hxs.select('//*[@id="member-1"]/p/text() \
+                                            ').extract()
+        item['locality'] = hxs.select('//*[@id="headline"]/dd[1]/span/text() \
+                                            ').extract()
+        item['industry'] = hxs.select('//*[@id="headline"]/dd[2]/text() \
+                                            ').extract()
+        item['current_roles'] = hxs.select('//*[@id="overview"]/dd[1]/ul/li/ \
+                                                          text()').extract()
+        if hxs.select('//*[@id="overview"]/dt[2]/text()\
+                                ').extract() == [u' \n       Education\n    ']:
+          item['education_institutions'] = hxs.select('//*[@id="overview"]/\
+                                                dd[2]/ul/li/text()').extract()
+        print item

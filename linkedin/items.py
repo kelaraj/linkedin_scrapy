@@ -6,5 +6,12 @@
 from scrapy.item import Item, Field
 
 class LinkedinItem(Item):
-    # define the fields for your item here:
-    name = Field()
+  # define the fields for your item here:
+  full_name = Field()
+  first_name = Field()
+  last_name = Field()
+  headline_title = Field()
+  locality = Field()
+  industry = Field()
+  current_roles = Field()
+  education_institutions = Field()
