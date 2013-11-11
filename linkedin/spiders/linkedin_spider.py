@@ -31,20 +31,18 @@ class LinkedinSpider(CrawlSpider):
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
       item['name'] = hxs.select('//span/span/text()').extract()
-      # parse each duplicate profile
+      
+      # parse list of duplicate profile
       if not item['name']:
-        # make a list of multi profile urls
-        # NOTE: Page only displays 25 of possibly many more names;
-        # LinkedIn requests authentication to see the rest. Need to 
-        # resolve.
+        # NOTE: Results page only displays 25 of possibly many more names;
+        # LinkedIn requests authentication to see the rest. Need to resolve
         multi_profile_urls = hxs.select('//*[@id="result-set"]/li/h2/strong/ \
                                           a/@href').extract()
-        # scrape each profile recursively
         for profile_url in multi_profile_urls:
-          # make profile url scrapy response objects
           yield Request(profile_url, callback=self.parse_item)
+      
       else:
+        # all of this should be handles in pipeline?
         first_name = item["name"][0]
         last_name = item["name"][2]
-        print first_name, last_name
         # insert into database
