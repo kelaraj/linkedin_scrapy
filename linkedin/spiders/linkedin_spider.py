@@ -1,15 +1,16 @@
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import HtmlXPathSelector
+from scrapy.http import Request
 from linkedin.items import LinkedinItem
 
 class LinkedinSpider(CrawlSpider):
   name = "linkedin"
   allowed_domains = ["linkedin.com"]
+  '''
   centilist_one = [i for i in xrange(1,100)]
   centilist_two = [i for i in xrange(1,100)]
   centilist_three = [i for i in xrange(1,100)]
-  '''
   start_urls = ["http://www.linkedin.com/directory/people-%s-%d-%d-%d" 
                 % (alphanum, num_one, num_two, num_three) 
                   for alphanum in "abcdefghijklmnopqrstuvwxyz"
@@ -30,18 +31,20 @@ class LinkedinSpider(CrawlSpider):
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
       item['name'] = hxs.select('//span/span/text()').extract()
-      # route duplicates
+      # parse each duplicate profile
       if not item['name']:
-        # parse each name in list
-        # get each link from the profile page, pass it to parse_item
-        #//*[@id="results"]/li[1]/div/h3/a/strong[2]
-        #for profile in profile_list:
-        #  self.parse_item(profile)
-        print "duplicates"
-        #return
+        # make a list of multi profile urls
+        # NOTE: Page only displays 25 of possibly many more names;
+        # LinkedIn requests authentication to see the rest. Need to 
+        # resolve.
+        multi_profile_urls = hxs.select('//*[@id="result-set"]/li/h2/strong/ \
+                                          a/@href').extract()
+        # scrape each profile recursively
+        for profile_url in multi_profile_urls:
+          # make profile url scrapy response objects
+          yield Request(profile_url, callback=self.parse_item)
       else:
-        #first_name = item["name"][0]
-        #last_name = item["name"][2]
+        first_name = item["name"][0]
+        last_name = item["name"][2]
+        print first_name, last_name
         # insert into database
-        print "not duplicates"
-        #return
