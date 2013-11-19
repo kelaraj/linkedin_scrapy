@@ -4,13 +4,20 @@ from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
 from linkedin.items import LinkedinItem
 
-# TODO: compile to C using Cython
+# compile to C using Cython if processing speed becomes a constraint
 
 class LinkedinSpider(CrawlSpider):
+  
+  """
+  Define the crawler's start urls, set its follow rules, parse HTML
+  and assign values to an item. Processing occurs in ../pipelines.py
+  """
+
   name = "linkedin"
   allowed_domains = ["linkedin.com"]
-
-  # generators instead of iterables to save memory
+  
+  # TODO: uncomment following lines for full spidering
+  '''
   centilist_one = (i for i in xrange(1,100))
   centilist_two = (i for i in xrange(1,100))
   centilist_three = (i for i in xrange(1,100))
@@ -21,9 +28,10 @@ class LinkedinSpider(CrawlSpider):
                   for num_two in centilist_two
                   for num_three in centilist_three
                 ]
-
-  #start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
-  # TODO: allow /in/name urls too? custom urls
+  '''
+  # temporary start url, remove for production
+  start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
+  # TODO: allow /in/name urls too? (LinkedIn custom URLs)
   rules = (Rule(SgmlLinkExtractor(allow=('\/pub\/.+', ))
                 , callback='parse_item'),
           )
