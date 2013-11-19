@@ -4,13 +4,16 @@ from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
 from linkedin.items import LinkedinItem
 
+# TODO: compile to C using Cython
+
 class LinkedinSpider(CrawlSpider):
   name = "linkedin"
   allowed_domains = ["linkedin.com"]
-  '''
-  centilist_one = [i for i in xrange(1,100)]
-  centilist_two = [i for i in xrange(1,100)]
-  centilist_three = [i for i in xrange(1,100)]
+
+  # generators instead of iterables to save memory
+  centilist_one = (i for i in xrange(1,100))
+  centilist_two = (i for i in xrange(1,100))
+  centilist_three = (i for i in xrange(1,100))
   start_urls = ["http://www.linkedin.com/directory/people-%s-%d-%d-%d" 
                 % (alphanum, num_one, num_two, num_three) 
                   for alphanum in "abcdefghijklmnopqrstuvwxyz"
@@ -18,9 +21,9 @@ class LinkedinSpider(CrawlSpider):
                   for num_two in centilist_two
                   for num_three in centilist_three
                 ]
-  '''
-  start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
 
+  #start_urls = ["http://www.linkedin.com/directory/people-a-23-23-2"]
+  # TODO: allow /in/name urls too? custom urls
   rules = (Rule(SgmlLinkExtractor(allow=('\/pub\/.+', ))
                 , callback='parse_item'),
           )
@@ -29,11 +32,14 @@ class LinkedinSpider(CrawlSpider):
     if response:
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
+      # TODO: update this xpath to include class id
+      # is this the best way to check that I'm scraping the right page
       item['full_name'] = hxs.select('//span/span/text()').extract()
       if not item['full_name']:
         # recursively parse list of duplicate profiles
         # NOTE: Results page only displays 25 of possibly many more names;
         # LinkedIn requests authentication to see the rest. Need to resolve
+        # TODO: add error checking here to ensure I'm getting the right links
         multi_profile_urls = hxs.select('//*[@id="result-set"]/li/h2/strong/ \
                                           a/@href').extract()
         for profile_url in multi_profile_urls:
@@ -51,8 +57,11 @@ class LinkedinSpider(CrawlSpider):
                                             ').extract()
         item['current_roles'] = hxs.select('//*[@id="overview"]/dd[1]/ul/li/ \
                                                           text()').extract()
+        # TODO: dynamically check for header of field, assign to object
+        # via variable
         if hxs.select('//*[@id="overview"]/dt[2]/text()\
                                 ').extract() == [u' \n       Education\n    ']:
           item['education_institutions'] = hxs.select('//*[@id="overview"]/\
                                                 dd[2]/ul/li/text()').extract()
+        # for debugging
         print item
