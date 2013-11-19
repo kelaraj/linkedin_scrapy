@@ -40,23 +40,25 @@ class LinkedinSpider(CrawlSpider):
     if response:
       hxs = HtmlXPathSelector(response)
       item = LinkedinItem()
-      # TODO: update this xpath to include class id
-      # is this the best way to check that I'm scraping the right page
-      item['full_name'] = hxs.select('//span/span/text()').extract()
+      # is this the best way to check that I'm scraping the right page?
+      item['full_name'] = hxs.select('//*[@id="name"]/span/span/text()').extract()
       if not item['full_name']:
         # recursively parse list of duplicate profiles
         # NOTE: Results page only displays 25 of possibly many more names;
         # LinkedIn requests authentication to see the rest. Need to resolve
+        # Fake account and log-in?
+        
         # TODO: add error checking here to ensure I'm getting the right links
+        # and links from "next>>" pages
         multi_profile_urls = hxs.select('//*[@id="result-set"]/li/h2/strong/ \
                                           a/@href').extract()
         for profile_url in multi_profile_urls:
           yield Request(profile_url, callback=self.parse_item)
       else:
-        # handle cleaning in pipeline
+        # add meta fields (date crawled/updated, etc)
         item['first_name'] = item['full_name'][0]
-        item['last_name'] = item['full_name'][2]
-        item['full_name'] = hxs.select('//span/span/text()').extract()
+        item['last_name'] = item['full_name'][1]
+        item['full_name'] = hxs.select('//*[@id="name"]/span/span/text()').extract()
         item['headline_title'] = hxs.select('//*[@id="member-1"]/p/text() \
                                             ').extract()
         item['locality'] = hxs.select('//*[@id="headline"]/dd[1]/span/text() \
