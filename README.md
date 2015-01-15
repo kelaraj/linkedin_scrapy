@@ -1,4 +1,4 @@
 linkedin-scrapy
 ===============
 
-Scrape every LinkedIn public profile using Scrapy (Python)
+An incomplete web crawler which scrapes every LinkedIn public profile using the Scrapy Python library
